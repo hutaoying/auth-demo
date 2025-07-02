@@ -1,0 +1,39 @@
+启动postgresql 容器
+verion: 14
+docker pull postgresql:14
+docker run -d \
+  --name 1-postgres-1 \
+  -e POSTGRES_USER=root \
+  -e POSTGRES_PASSWORD='1qazcde3!@#' \
+  -e POSTGRES_DB=ailpha \
+  -p 5432:5432 \
+  -v pg_data:/var/lib/postgresql/data \
+  postgres:14
+
+
+----  redis ------
+version:8.0.2
+
+  -v /data/redis/config/redis.conf:/etc/redis/redis.conf \
+
+  docker run -d \
+    --name 1-redis-1 \
+    --restart unless-stopped \
+    --memory 4g \
+    --cpus 2 \
+    --ulimit nofile=65535:65535 \
+    -p 6379:6379 \
+    -v redis_data:/data \
+    -v redis_logs:/logs \
+    redis:8.0.2 \
+    redis-server /etc/redis/redis.conf \
+    --requirepass "2wsxVFR_" \
+    --appendonly yes \
+    --save "" \
+    --maxmemory 3gb \
+    --maxmemory-policy volatile-lru
+
+
+### kafka 启动
+
+version:

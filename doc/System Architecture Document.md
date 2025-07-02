@@ -30,6 +30,7 @@
 - **消息队列**: Kafka，用于异步事件处理（如邮件通知）。
 - **缓存**: Redis，用于会话管理和高频数据缓存。
 - **部署**: Docker 容器，Kubernetes 编排。
+- **服务注册与配置管理**: Nacos。
 
 ### 2.4 组件交互
 - 用户通过前端（React 或其他）访问服务网关。
@@ -40,7 +41,8 @@
 - **编程语言**: Java 17 (LTS 版本，性能优化，支持新特性如记录类)。
 - **框架**: Spring Boot 3.5.0（支持 GraalVM、AOT 编译，提升启动性能）。
 - **认证授权**: Spring Security（RBAC 模型，JWT 认证）。
-- **数据库**: PostgreSQL 16（支持 JSONB，适合扩展数据存储）。
+- **ORM**: mybatis。
+- **数据库**: PostgreSQL 14（支持 JSONB，适合扩展数据存储）。
 - **缓存**: Redis 7（高性能，分布式缓存）。
 - **消息队列**: Kafka 3.6（异步事件处理，支持高吞吐）。
 - **网关**: Spring Cloud Gateway（路由和过滤）。
@@ -61,27 +63,27 @@
 ## 5. 数据模型
 ### 5.1 数据库表
 - **Users**:
-  - `id`: BIGINT, 主键。
+  - `id`: BIGSERIAL, 主键。
   - `email`: VARCHAR(255), 唯一。
   - `password_hash`: VARCHAR(255), BCrypt 加密。
   - `username`: VARCHAR(100).
   - `created_at`: TIMESTAMP.
 - **Roles**:
-  - `id`: BIGINT, 主键。
+  - `id`: BIGSERIAL, 主键。
   - `name`: VARCHAR(50), 唯一。
   - `description`: TEXT.
 - **Permissions**:
-  - `id`: BIGINT, 主键。
+  - `id`: BIGSERIAL, 主键。
   - `name`: VARCHAR(50), 唯一。
   - `resource`: VARCHAR(255), 资源路径（如 `/api/tasks`）。
 - **User_Roles**:
-  - `user_id`: BIGINT, 外键。
-  - `role_id`: BIGINT, 外键。
+  - `user_id`: BIGSERIAL, 外键。
+  - `role_id`: BIGSERIAL, 外键。
 - **Role_Permissions**:
-  - `role_id`: BIGINT, 外键。
+  - `role_id`: BIGSERIAL, 外键。
   - `permission_id`: BIGINT, 外键。
 - **Services**:
-  - `id`: BIGINT, 主键。
+  - `id`: BIGSERIAL, 主键。
   - `name`: VARCHAR(50), 服务名称。
   - `endpoint`: VARCHAR(255), 服务 API 入口。
   - `metadata`: JSONB, 服务配置。
@@ -90,7 +92,7 @@
 ```plantuml
 @startuml
 entity "Users" {
-  * id : BIGINT <<PK>>
+  * id : BIGSERIAL <<PK>>
   --
   email : VARCHAR(255) <<UNIQUE>>
   password_hash : VARCHAR(255)
@@ -99,31 +101,31 @@ entity "Users" {
 }
 
 entity "Roles" {
-  * id : BIGINT <<PK>>
+  * id : BIGSERIAL <<PK>>
   --
   name : VARCHAR(50) <<UNIQUE>>
   description : TEXT
 }
 
 entity "Permissions" {
-  * id : BIGINT <<PK>>
+  * id : BIGSERIAL <<PK>>
   --
   name : VARCHAR(50) <<UNIQUE>>
   resource : VARCHAR(255)
 }
 
 entity "User_Roles" {
-  * user_id : BIGINT <<FK>>
-  * role_id : BIGINT <<FK>>
+  * user_id : BIGSERIAL <<FK>>
+  * role_id : BIGSERIAL <<FK>>
 }
 
 entity "Role_Permissions" {
-  * role_id : BIGINT <<FK>>
-  * permission_id : BIGINT <<FK>>
+  * role_id : BIGSERIAL <<FK>>
+  * permission_id : BIGSERIAL <<FK>>
 }
 
 entity "Services" {
-  * id : BIGINT <<PK>>
+  * id : BIGSERIAL <<PK>>
   --
   name : VARCHAR(50)
   endpoint : VARCHAR(255)

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hangyue.auth.mapper.UserMapper">
+    <resultMap id="userMap" type="com.hangyue.auth.entity.UserEntity">
+        <id property="id" column="id"/>
+        <result property="email" column="email"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="username" column="username"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+    
+    <select id="findByEmail" resultMap="userMap">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
+    
+    <select id="findById" resultMap="userMap">
+        SELECT * FROM users WHERE id = #{id}
+    </select>
+    
+    <insert id="insert" parameterType="com.hangyue.auth.entity.UserEntity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (email, password_hash, username, created_at)
+        VALUES (#{email}, #{passwordHash}, #{username}, #{createdAt})
+    </insert>
+    
+    <update id="update" parameterType="com.hangyue.auth.entity.UserEntity">
+        UPDATE users
+        SET username = #{username}
+        WHERE id = #{id}
+    </update>
+</mapper>

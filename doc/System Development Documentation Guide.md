@@ -59,6 +59,7 @@
   - 编程语言（如 Python、Java）
   - 框架（如 Spring Boot、React）
   - 数据库（如 MySQL、MongoDB）
+  - ORM mybatis
   - 基础设施（如 AWS、Docker、Kubernetes）
 - **部署视图**: 物理/云端部署方案（如服务器分布、负载均衡）
 - **数据模型**: 数据库表结构或 NoSQL 数据结构，包含 ER 图
