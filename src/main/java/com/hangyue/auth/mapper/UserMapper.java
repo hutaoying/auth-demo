@@ -13,4 +13,5 @@ public interface UserMapper {
     int update(UserEntity user);
     
     UserEntity findById(@Param("id") Long id);
+    
 }

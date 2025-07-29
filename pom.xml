@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.1.10</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.hangyue</groupId>
@@ -28,13 +28,20 @@
     </scm>
     <properties>
         <java.version>17</java.version>
-        <postgresql.version>42.6.0</postgresql.version>
-        <mybatis.version>3.5.9</mybatis.version>
+        <postgresql.version>42.7.7</postgresql.version>
+        <mybatis.version>3.0.3</mybatis.version>
         <jjwt.version>0.11.5</jjwt.version>
-        <redis.version>2.7.0</redis.version>
-        <kafka.version>3.2.3</kafka.version>
+
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
+        <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -42,6 +49,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        
+        <!-- Actuator依赖，用于支持配置刷新功能 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -65,8 +78,8 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>3.0.3</version>
         </dependency>
-        
-        <!-- JWT依赖 -->
+
+        <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -76,12 +89,15 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
             <version>${jjwt.version}</version>
-    
+            <!-- 建议使用 runtime scope -->
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
+            <!-- 建议使用 runtime scope -->
+            <scope>runtime</scope>
         </dependency>
         
         <!-- Redis依赖 -->
@@ -108,7 +124,46 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+
+        <!-- Nacos Config -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        <!-- Nacos Discovery -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+
+
+        <!-- 如果需要分布式 Session (可选)
+               <dependency>
+                   <groupId>org.springframework.session</groupId>
+                   <artifactId>spring-session-data-redis</artifactId>
+               </dependency>
+               -->
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

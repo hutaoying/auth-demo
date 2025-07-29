@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:14 # 使用较新的稳定版本
+    container_name: 1-postgres-1
+    environment:
+      POSTGRES_DB: ailpha        # 数据库名称
+      POSTGRES_USER: root    # 用户名
+      POSTGRES_PASSWORD: 1qazcde3!@# # 密码 (开发环境请勿用于生产)
+    ports:
+      - "5432:5432"              # 映射端口到宿主机
+    volumes:
+      - /Users/taoyinghu/Docker/data/pg_data:/var/lib/postgresql/data # 持久化数据
+    networks:
+      - app-network
+    healthcheck: # 健康检查
+      test: ["CMD-SHELL", "pg_isready -U root -d ailpha"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:8.0.2 # 使用较新的稳定版本
+    container_name: 1-redis-1
+    ports:
+      - "6379:6379"     # 映射端口到宿主机
+    command: redis-server --appendonly yes --requirepass "2wsxVFR_" # 启用 AOF 持久化
+    volumes:
+      - /Users/taoyinghu/Docker/data/redis_data:/data # 持久化数据
+    networks:
+      - app-network
+    healthcheck: # 健康检查
+      test: ["CMD", "redis-cli", "-a", "2wsxVFR_", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Kafka 消息队列 (需要 Zookeeper)
+  zookeeper:
+    image: bitnami/zookeeper:3.8
+    container_name: 1-zookeeper-1
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "zkServer.sh", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  kafka:
+    image: bitnami/kafka:3.4
+    container_name: 1-kafka-1
+    ports:
+      - "9092:9092"
+      # - "9093:9093" # 如果需要外部 SASL/PLAIN 认证监听器
+    environment:
+
+      # --- Zookeeper 配置 ---
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      # --- 基本 Broker 配置 ---
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # --- 其他配置 ---
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_CFG_LOG_CLEANUP_POLICY: delete
+      KAFKA_CFG_LOG_RETENTION_MS: 60000
+      KAFKA_CFG_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_CFG_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+    depends_on:
+      - zookeeper
+    volumes:
+      - /Users/taoyinghu/Docker/data/kafka_data:/bitnami/kafka # 持久化数据
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions.sh --bootstrap-server localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # Nacos 配置和服务发现
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    platform: linux/amd64
+    container_name: 1-nacos-1
+    environment:
+      MODE: standalone # 单机模式
+      EMBEDDED_STORAGE: "true" # 使用内嵌数据库
+      # SPRING_DATASOURCE_PLATFORM: mysql # Nacos 2.x 默认使用内嵌数据库，但可以配置 MySQL
+      # 如果使用内嵌数据库 (默认)，以下数据库配置可以省略
+      # MYSQL_SERVICE_HOST: mysql # 如果配置了外部 MySQL
+      # MYSQL_SERVICE_PORT: 3306
+      # MYSQL_SERVICE_DB_NAME: nacos_devtest
+      # MYSQL_SERVICE_USER: nacos
+      # MYSQL_SERVICE_PASSWORD: nacos
+      JVM_XMS: 512m # JVM 最小堆内存
+      JVM_XMX: 512m # JVM 最大堆内存
+      JVM_XMN: 256m # JVM 新生代内存
+    volumes:
+      - /Users/taoyinghu/Docker/data/nacos_data:/home/nacos/data # 持久化数据 (如果使用内嵌数据库)
+      - /Users/taoyinghu/Docker/data/nacos_logs:/home/nacos/logs # 日志
+    ports:
+      - "8848:8848" # 主端口
+      - "9848:9848" # gRPC 端口 (客户端 SDK >= 2.0.0 需要)
+      - "9849:9849" # gRPC 端口 (客户端 SDK >= 2.0.0 需要)
+    networks:
+      - app-network
+#    healthcheck:
+#      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/v1/console/health/readiness"] # 检查就绪探针
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 60s # Nacos 启动较慢，给更多时间
+
+
+# 定义网络
+networks:
+  app-network:
+    driver: bridge

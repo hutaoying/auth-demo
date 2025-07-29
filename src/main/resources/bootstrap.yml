@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: auth-demo
+  cloud:
+    nacos:
+      config:
+        server-addr: localhost:8848
+        file-extension: properties
+        namespace: joyce
+        timeout: 10000
+        shared-configs:
+          - data-id: global.properties
+            group: DEFAULT_GROUP
+            refresh: true
+#        username: nacos
+#        password: nacos
+      discovery:
+        server-addr: localhost:8848
+        namespace: joyce
+
+nacos:
+  config:
+    auto-push: true
+    group: TEST_GROUP
+    local-file: classpath:global.properties
